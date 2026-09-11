@@ -1,16 +1,9 @@
-// ============================================================================
-//  dataset.cpp - see dataset.hpp
-// ============================================================================
 #include <iostream>
 #include <fstream>
 #include <sstream>
 
 #include "dataset.hpp"
 #include "patient_list.hpp"
-
-// ----------------------------------------------------------------------------
-//  Age groups + cost model
-// ----------------------------------------------------------------------------
 
 const int GROUP_UPPER[GROUP_COUNT] = { 17, 25, 45, 60, 100 };
 
@@ -57,10 +50,6 @@ int CareTypeRegistry::indexOf(const std::string& name) {
     return count_++;
 }
 
-// ----------------------------------------------------------------------------
-//  CSV loading
-// ----------------------------------------------------------------------------
-
 void trim(std::string& s) {
     size_t b = 0;
     size_t e = s.size();
@@ -79,7 +68,6 @@ bool splitCSV(const std::string& line, std::string out[], int expected) {
         trim(field);
         out[i++] = field;
     }
-    // Too few columns, or extra trailing columns -> reject the row.
     if (i != expected) return false;
     return !std::getline(ss, field);
 }
@@ -97,7 +85,6 @@ int loadCSV(const std::string& path, PatientList& list, int& skippedRows) {
     int loaded = 0;
     skippedRows = 0;
 
-    // Discard the header row.
     if (!std::getline(file, line)) {
         std::cerr << "ERROR: \"" << path << "\" is empty\n";
         return -1;
@@ -115,7 +102,6 @@ int loadCSV(const std::string& path, PatientList& list, int& skippedRows) {
         Patient p;
         p.patientID = field[0];
         p.careType  = field[2];
-        // std::stoi / std::stod throw on garbage - guard the whole conversion.
         try {
             p.age               = std::stoi(field[1]);
             p.lengthOfStay      = std::stoi(field[3]);
@@ -132,8 +118,8 @@ int loadCSV(const std::string& path, PatientList& list, int& skippedRows) {
             continue;
         }
 
-        g_careTypes.indexOf(p.careType);   // register the care type
-        categoriseAndBill(p);              // derive age group + cost
+        g_careTypes.indexOf(p.careType);
+        categoriseAndBill(p);
         list.append(p);
         ++loaded;
     }

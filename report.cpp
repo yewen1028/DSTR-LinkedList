@@ -1,15 +1,8 @@
-// ============================================================================
-//  report.cpp - see report.hpp
-// ============================================================================
 #include <iostream>
 #include <iomanip>
 #include <sstream>
 
 #include "report.hpp"
-
-// ----------------------------------------------------------------------------
-//  Analysis
-// ----------------------------------------------------------------------------
 
 void Analysis::reset() {
     for (int g = 0; g < GROUP_COUNT; ++g) {
@@ -71,10 +64,6 @@ void analyse(const PatientList& list, Analysis& out) {
 bool byCostDesc(const Patient& a, const Patient& b) { return a.medicalCost > b.medicalCost; }
 bool byAgeAsc  (const Patient& a, const Patient& b) { return a.age < b.age; }
 
-// ----------------------------------------------------------------------------
-//  Console tables
-// ----------------------------------------------------------------------------
-
 void rule(int width) {
     std::cout << std::string(static_cast<size_t>(width), '-') << "\n";
 }
@@ -88,7 +77,7 @@ void printLegend() {
     }
 }
 
-void printSampleRows(const PatientList& list, int n) {
+void printRowHeader() {
     std::cout << std::left
               << std::setw(10) << "PatientID"
               << std::setw(5)  << "Age"
@@ -100,20 +89,27 @@ void printSampleRows(const PatientList& list, int n) {
               << std::setw(8)  << "Visits"
               << std::setw(14) << "Cost(RM)" << "\n";
     rule(92);
+}
+
+void printPatientRow(const Patient& p) {
+    std::cout << std::left
+              << std::setw(10) << p.patientID
+              << std::setw(5)  << p.age
+              << std::setw(21) << GROUP_LABEL[p.ageGroup]
+              << std::setw(18) << p.careType
+              << std::right << std::fixed << std::setprecision(2)
+              << std::setw(7)  << p.lengthOfStay
+              << std::setw(9)  << p.baseCostPerHour
+              << std::setw(8)  << p.daysVisitsPerYear
+              << std::setw(14) << p.medicalCost << "\n";
+}
+
+void printSampleRows(const PatientList& list, int n) {
+    printRowHeader();
 
     int i = 0;
     for (Node* cur = list.head(); cur != nullptr && i < n; cur = cur->next, ++i) {
-        const Patient& p = cur->data;
-        std::cout << std::left
-                  << std::setw(10) << p.patientID
-                  << std::setw(5)  << p.age
-                  << std::setw(21) << GROUP_LABEL[p.ageGroup]
-                  << std::setw(18) << p.careType
-                  << std::right << std::fixed << std::setprecision(2)
-                  << std::setw(7)  << p.lengthOfStay
-                  << std::setw(9)  << p.baseCostPerHour
-                  << std::setw(8)  << p.daysVisitsPerYear
-                  << std::setw(14) << p.medicalCost << "\n";
+        printPatientRow(cur->data);
     }
     if (list.size() > n) {
         std::cout << "... (" << (list.size() - n) << " more records)\n";
@@ -176,7 +172,7 @@ void printCareTypeTable(const Analysis& a, const std::string& title) {
     rule(77);
 
     for (int c = 0; c < g_careTypes.count(); ++c) {
-        if (a.carePatients[c] == 0) continue;   // not offered by this dataset
+        if (a.carePatients[c] == 0) continue;
         const int n = a.carePatients[c];
         std::cout << std::left  << std::setw(18) << g_careTypes.name(c)
                   << std::right << std::setw(9) << n

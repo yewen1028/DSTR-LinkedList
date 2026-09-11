@@ -1,6 +1,3 @@
-// ============================================================================
-//  patient_list.cpp - see patient_list.hpp
-// ============================================================================
 #include "patient_list.hpp"
 
 void PatientList::append(const Patient& p) {
@@ -61,14 +58,14 @@ Node* PatientList::split(Node* start) {
 
 Node* PatientList::merge(Node* a, Node* b, PatientLess less) {
     Patient dummy;
-    Node    stub(dummy);   // dummy head, avoids special-casing the first link
+    Node    stub(dummy);
     Node*   tail = &stub;
 
     while (a != nullptr && b != nullptr) {
         if (less(b->data, a->data)) {
             tail->next = b;
             b = b->next;
-        } else {                    // stable: ties keep a before b
+        } else {
             tail->next = a;
             a = a->next;
         }
