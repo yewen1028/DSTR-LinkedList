@@ -1,5 +1,7 @@
 #include "patient_list.hpp"
 
+long g_sortComparisons = 0;
+
 void PatientList::append(const Patient& p) {
     Node* n = new Node(p);
     if (tail_ == nullptr) {
@@ -27,6 +29,7 @@ Node* PatientList::findByID(const std::string& id) const {
 }
 
 void PatientList::sort(PatientLess less) {
+    g_sortComparisons = 0;
     head_ = mergeSort(head_, less);
     Node* cur = head_;
     while (cur != nullptr && cur->next != nullptr) cur = cur->next;

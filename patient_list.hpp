@@ -13,6 +13,8 @@ struct Node {
 
 typedef bool (*PatientLess)(const Patient& a, const Patient& b);
 
+extern long g_sortComparisons;
+
 class PatientList {
 public:
     PatientList() : head_(nullptr), tail_(nullptr), size_(0) {}
@@ -29,6 +31,7 @@ public:
     Node* findByID(const std::string& id) const;
 
     void sort(PatientLess less);
+    void insertionSort(PatientLess less);
 
     void clear();
 
