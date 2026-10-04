@@ -36,35 +36,34 @@ void PatientList::sort(PatientLess less) {
     tail_ = cur;
 }
 
-// Insertion sort for linked list
+//Step6: Sorting experiment - insertion sort
 void PatientList::insertionSort(PatientLess less) {
     g_sortComparisons = 0;
     Node* sorted = nullptr;
-    Node* cur = head_;
-    while (cur != nullptr) {
-        Node* nxt = cur->next;
-        if (sorted == nullptr) {
-            ++g_sortComparisons;
-            sorted = cur;
+    Node* current = head_;
+
+    while (current != nullptr) {
+        Node* nextNode = current->next;
+        g_sortComparisons++;
+
+        if (sorted == nullptr || less(current->data, sorted->data)) {
+            current->next = sorted;
+            sorted = current;
         } else {
-            ++g_sortComparisons;
-            if (less(cur->data, sorted->data)) {
-                cur->next = sorted;
-                sorted = cur;
-            } else {
-                Node* p = sorted;
-                while (p->next != nullptr) {
-                    ++g_sortComparisons;
-                    if (less(cur->data, p->next->data)) break;
-                    p = p->next;
-                }
-            cur->next = p->next;
-            p->next = cur;
+            Node* temp = sorted;
+            while (temp->next != nullptr) {
+                g_sortComparisons++;
+                if (less(current->data, temp->next->data))
+                    break;
+                temp = temp->next;
+            }
+            current->next = temp->next;
+            temp->next = current;
         }
-        }
-        cur = nxt;
+        current = nextNode;
     }
     head_ = sorted;
+
     Node* last = head_;
     while (last != nullptr && last->next != nullptr) last = last->next;
     tail_ = last;
