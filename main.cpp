@@ -6,6 +6,7 @@
 #include "dataset.hpp"
 #include "patient_list.hpp"
 #include "report.hpp"
+#include "sort_search.hpp"
 
 const int DATASET_COUNT = 3;
 const int LIST_COUNT    = DATASET_COUNT + 1;
@@ -82,6 +83,56 @@ static void fullReport(const PatientList lists[], const Analysis stats[],
     printCrossMatrix(stats, shortLabels, DATASET_COUNT, stats[DATASET_COUNT], false);
 }
 
+//Step6 and Step7: Sorting and searching experiment
+static void sortSearchExperiment(PatientList lists[], const std::string labels[]) {
+    //Step6: Sorting experiment
+    std::cout << "\n=== SORTING EXPERIMENT (Step 6) ===" << std::endl;
+    for (int i = 0; i < LIST_COUNT; ++i) {
+        std::cout << "\n-- " << labels[i] << " (" << lists[i].size() << " records) --" << std::endl;
+
+        PatientLess rules[3] = { byAgeAsc, byStayAsc, byCostDesc };
+        std::string names[3] = { "Age", "LengthOfStay", "TotalCost" };
+        SortStats stats[6];
+
+        for (int k = 0; k < 3; ++k) {
+            lists[i].sort(byIdAsc);
+            stats[k] = measureSort(lists[i], rules[k], "Merge/" + names[k], false);
+            lists[i].sort(byIdAsc);
+            stats[k + 3] = measureSort(lists[i], rules[k], "Insert/" + names[k], true);
+        }
+        printSortStatsTable(stats, 6);
+    }
+
+    //Step7: Searching experiment
+    std::cout << "\n=== SEARCHING EXPERIMENT (Step 7) ===" << std::endl;
+    SearchCriteria crit;
+    crit.useAgeRange = true;
+    crit.minAge = 61;
+    crit.maxAge = 100;
+    crit.useCareType = true;
+    crit.careType = "Emergency";
+
+    for (int i = 0; i < LIST_COUNT; ++i) {
+        std::cout << "\n-- " << labels[i] << " --" << std::endl;
+        PatientList matches;
+        SearchStats searchStats[2];
+
+        searchStats[0] = linearSearch(lists[i], crit, matches);
+
+        lists[i].sort(byAgeAsc);
+        Node* hit = binarySearchByKey(lists[i], ageOf, 65.0, searchStats[1]);
+
+        printSearchStatsTable(searchStats, 2);
+        std::cout << "Matches for Age 61-100 + CareType=Emergency (" << matches.size() << " found):" << std::endl;
+        printSampleRows(matches, matches.size());
+
+        if (hit != nullptr)
+            std::cout << "Binary search found Age==65: " << hit->data.patientID << std::endl;
+        else
+            std::cout << "Binary search: no exact Age==65 match in this list" << std::endl;
+    }
+}
+
 int main() {
     const std::string FILES[DATASET_COUNT] = {
         "dataset/dataset1 facility_a.csv",
@@ -120,9 +171,10 @@ int main() {
                   << "  4. Care type analysis\n"
                   << "  5. Cross-dataset comparison\n"
                   << "  6. Full report (everything above)\n"
+                  << "  7. Sorting and searching experiment (Step 6-7)\n"
                   << "  0. Exit\n";
 
-        const int choice = readInt("Enter a Choice: ", 0, 6, 0);
+        const int choice = readInt("Enter a Choice: ", 0, 7, 0);
 
         switch (choice) {
             case 1:
@@ -166,6 +218,11 @@ int main() {
 
             case 6:
                 fullReport(lists, stats, LABELS, SHORT_LABELS);
+                pause();
+                break;
+
+            case 7:
+                sortSearchExperiment(lists, LABELS);
                 pause();
                 break;
 
