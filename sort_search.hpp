@@ -21,6 +21,7 @@ struct SortStats {
 
 SortStats measureSort(PatientList& list, PatientLess less, const std::string& label, bool useInsertion = false);
 
+bool byStayAsc(const Patient& a, const Patient& b);
 bool byIdAsc(const Patient& a, const Patient& b);
 
 void printSortStatsTable(const SortStats stats[], int count);
