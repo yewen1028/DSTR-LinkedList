@@ -1,3 +1,4 @@
+#include <cstdlib>
 #include <iostream>
 #include <iomanip>
 #include <sstream>
@@ -33,6 +34,16 @@ static int readInt(const std::string& prompt, int lo, int hi, int onEOF) {
     return onEOF;
 }
 
+// Wipe the console so each menu and result starts on a fresh screen.
+// Also stops the VS Code terminal from leaving stale text from earlier output.
+static void clearScreen() {
+#ifdef _WIN32
+    std::system("cls");
+#else
+    std::system("clear");
+#endif
+}
+
 static void pause() {
     std::string ignored;
     std::cout << "\n(press Enter to return to the menu) ";
@@ -53,7 +64,7 @@ static bool loadAll(PatientList lists[], const std::string files[]) {
 }
 
 static int pickList(const std::string labels[]) {
-    std::cout << "\nSelect data source\n";
+    std::cout << "Select data source\n";
     for (int i = 0; i < DATASET_COUNT; ++i) {
         std::cout << "  " << (i + 1) << ". " << labels[i] << "\n";
     }
@@ -191,7 +202,8 @@ int main() {
 
     bool running = true;
     while (running) {
-        std::cout << "\n============================================================\n"
+        clearScreen();
+        std::cout << "============================================================\n"
                   << "  Singly Linked List Menu\n"
                   << "============================================================\n"
                   << "  1. Age group legend\n"
@@ -204,6 +216,7 @@ int main() {
                   << "  0. Exit\n";
 
         const int choice = readInt("Enter a Choice: ", 0, 7, 0);
+        clearScreen();
 
         switch (choice) {
             case 1:
@@ -215,6 +228,7 @@ int main() {
                 const int which = pickList(LABELS);
                 if (which < 0) break;
                 const int rows = readInt("How many records to display (1-50): ", 1, 50, 10);
+                clearScreen();
                 std::cout << "\n" << LABELS[which] << "  ("
                           << lists[which].size() << " records)\n";
                 printSampleRows(lists[which], rows);
@@ -225,6 +239,7 @@ int main() {
             case 3: {
                 const int which = pickList(LABELS);
                 if (which < 0) break;
+                clearScreen();
                 printAgeGroupTable(stats[which], LABELS[which]);
                 pause();
                 break;
@@ -233,6 +248,7 @@ int main() {
             case 4: {
                 const int which = pickList(LABELS);
                 if (which < 0) break;
+                clearScreen();
                 printCareTypeTable(stats[which], LABELS[which]);
                 pause();
                 break;
