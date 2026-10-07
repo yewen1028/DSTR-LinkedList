@@ -9,26 +9,28 @@
 #include "report.hpp"
 #include "sort_search.hpp"
 
+using namespace std;
+
 const int DATASET_COUNT = 3;
 const int LIST_COUNT    = DATASET_COUNT + 1;
 
-static bool readLine(const std::string& prompt, std::string& out) {
-    std::cout << prompt;
-    if (!std::getline(std::cin, out)) return false;
+static bool readLine(const string& prompt, string& out) {
+    cout << prompt;
+    if (!getline(cin, out)) return false;
     trim(out);
     return true;
 }
 
-static int readInt(const std::string& prompt, int lo, int hi, int onEOF) {
-    std::string line;
+static int readInt(const string& prompt, int lo, int hi, int onEOF) {
+    string line;
     while (readLine(prompt, line)) {
-        std::stringstream ss(line);
+        stringstream ss(line);
         int value = 0;
         char extra = 0;
         if ((ss >> value) && !(ss >> extra) && value >= lo && value <= hi) {
             return value;
         }
-        std::cout << "  Invalid input. Enter a whole number from "
+        cout << "  Invalid input. Enter a whole number from "
                   << lo << " to " << hi << ".\n";
     }
     return onEOF;
@@ -38,19 +40,19 @@ static int readInt(const std::string& prompt, int lo, int hi, int onEOF) {
 // Also stops the VS Code terminal from leaving stale text from earlier output.
 static void clearScreen() {
 #ifdef _WIN32
-    std::system("cls");
+    system("cls");
 #else
-    std::system("clear");
+    system("clear");
 #endif
 }
 
 static void pause() {
-    std::string ignored;
-    std::cout << "\n(press Enter to return to the menu) ";
-    std::getline(std::cin, ignored);
+    string ignored;
+    cout << "\n(press Enter to return to the menu) ";
+    getline(cin, ignored);
 }
 
-static bool loadAll(PatientList lists[], const std::string files[]) {
+static bool loadAll(PatientList lists[], const string files[]) {
     for (int i = 0; i < DATASET_COUNT; ++i) {
         int skipped = 0;
         const int n = loadCSV(files[i], lists[i], skipped);
@@ -63,12 +65,12 @@ static bool loadAll(PatientList lists[], const std::string files[]) {
     return true;
 }
 
-static int pickList(const std::string labels[]) {
-    std::cout << "Select data source\n";
+static int pickList(const string labels[]) {
+    cout << "Select data source\n";
     for (int i = 0; i < DATASET_COUNT; ++i) {
-        std::cout << "  " << (i + 1) << ". " << labels[i] << "\n";
+        cout << "  " << (i + 1) << ". " << labels[i] << "\n";
     }
-    std::cout << "  4. " << labels[DATASET_COUNT] << "\n"
+    cout << "  4. " << labels[DATASET_COUNT] << "\n"
               << "  0. Back\n";
 
     const int choice = readInt("Choice: ", 0, LIST_COUNT, 0);
@@ -76,30 +78,30 @@ static int pickList(const std::string labels[]) {
 }
 
 static void fullReport(const PatientList lists[], const Analysis stats[],
-                       const std::string labels[], const std::string shortLabels[]) {
+                       const string labels[], const string shortLabels[]) {
     printLegend();
 
-    std::cout << "\n=== SAMPLE RECORDS (" << labels[0] << ", first 10) ===\n";
+    cout << "\n=== SAMPLE RECORDS (" << labels[0] << ", first 10) ===\n";
     printSampleRows(lists[0], 10);
 
-    std::cout << "\n=== AGE GROUP ANALYSIS (top care type, total & average cost) ===\n";
+    cout << "\n=== AGE GROUP ANALYSIS (top care type, total & average cost) ===\n";
     for (int i = 0; i < LIST_COUNT; ++i) printAgeGroupTable(stats[i], labels[i]);
 
-    std::cout << "\n=== CARE TYPE ANALYSIS (total cost per care type) ===\n";
+    cout << "\n=== CARE TYPE ANALYSIS (total cost per care type) ===\n";
     for (int i = 0; i < LIST_COUNT; ++i) printCareTypeTable(stats[i], labels[i]);
 
-    std::cout << "\n=== CROSS-DATASET COMPARISON ===\n";
+    cout << "\n=== CROSS-DATASET COMPARISON ===\n";
     printDatasetComparison(stats, labels, DATASET_COUNT, stats[DATASET_COUNT]);
     printCrossMatrix(stats, shortLabels, DATASET_COUNT, stats[DATASET_COUNT], true);
     printCrossMatrix(stats, shortLabels, DATASET_COUNT, stats[DATASET_COUNT], false);
 }
 
 //Step6: Sorting experiment
-static void sortExperiment(PatientList lists[], const std::string labels[]) {
-    std::cout << "\n=== SORTING EXPERIMENT ===" << std::endl;
+static void sortExperiment(PatientList lists[], const string labels[]) {
+    cout << "\n=== SORTING EXPERIMENT ===" << endl;
     for (int i = 0; i < LIST_COUNT; ++i) {
         PatientLess rules[3] = { byAgeAsc, byStayAsc, byCostDesc };
-        std::string names[3] = { "Age", "LengthOfStay", "TotalCost" };
+        string names[3] = { "Age", "LengthOfStay", "TotalCost" };
         SortStats stats[6];
 
         // Reset to original (ID) order before every run so each sort starts
@@ -117,85 +119,87 @@ static void sortExperiment(PatientList lists[], const std::string labels[]) {
 }
 
 //Step7: Searching experiment
-static void searchExperiment(PatientList lists[], const std::string labels[]) {
-    std::cout << "\n=== SEARCHING EXPERIMENT ===" << std::endl;
-    SearchCriteria critA;
-    critA.useAgeRange = true;
-    critA.minAge = 61;
-    critA.maxAge = 100;
-    critA.useCareType = true;
-    critA.careType = "Emergency";
+static void searchExperiment(PatientList lists[], const string labels[]) {
+    cout << "\n=== SEARCHING EXPERIMENT ===" << endl;
+    // Senior emergency search: age group 61-100 + care type Emergency
+    SearchCriteria seniorEmergency;
+    seniorEmergency.useAgeRange = true;
+    seniorEmergency.minAge = 61;
+    seniorEmergency.maxAge = 100;
+    seniorEmergency.useCareType = true;
+    seniorEmergency.careType = "Emergency";
 
-    SearchCriteria critB;
-    critB.useStayOver = true;
-    critB.minLengthOfStay = 24;
+    // Long stay search: visit duration threshold > 24 hours
+    SearchCriteria longStay;
+    longStay.useStayOver = true;
+    longStay.minLengthOfStay = 24;
 
     for (int i = 0; i < LIST_COUNT; ++i) {
-        std::cout << "\n------------------------------------------------------------\n"
+        cout << "\n------------------------------------------------------------\n"
                   << labels[i] << " (" << lists[i].size() << " records)\n"
-                  << "------------------------------------------------------------" << std::endl;
+                  << "------------------------------------------------------------" << endl;
 
-        // Query A: linear search on unsorted (original order), then on data sorted by age
-        PatientList matchesA, matchesSortedA;
-        SearchStats a[3];
+        // Senior emergency search: linear search on unsorted (original order), then on data sorted by age
+        PatientList emergencyMatches, emergencyMatchesSorted;
+        SearchStats emergencyStats[3];
 
         lists[i].sort(byIdAsc);
-        a[0] = linearSearch(lists[i], critA, matchesA);
+        emergencyStats[0] = linearSearch(lists[i], seniorEmergency, emergencyMatches);
 
         lists[i].sort(byAgeAsc);
-        a[1] = rangeSearchSortedByAge(lists[i], critA, matchesSortedA);
-        Node* hit = binarySearchByKey(lists[i], ageOf, 65.0, a[2]);
+        emergencyStats[1] = rangeSearchSortedByAge(lists[i], seniorEmergency, emergencyMatchesSorted);
+        Node* hit = binarySearchByKey(lists[i], ageOf, 65.0, emergencyStats[2]);
 
-        std::cout << "\nQuery A: Age 61-100 + Care Type = Emergency" << std::endl;
-        printSearchStatsTable(a, 3);
-        std::cout << "\nMatching records (linear search result):" << std::endl;
-        printSampleRows(matchesA, 10);
+        cout << "\nSenior Emergency Patients: Age 61-100 + Care Type = Emergency" << endl;
+        printSearchStatsTable(emergencyStats, 3);
+        cout << "\nMatching records (linear search result):" << endl;
+        printSampleRows(emergencyMatches, 10);
         if (hit != nullptr)
-            std::cout << "Binary search found a patient aged 65: " << hit->data.patientID << std::endl;
+            cout << "Binary search found a patient aged 65: " << hit->data.patientID << endl;
         else
-            std::cout << "Binary search: no patient aged exactly 65 in this dataset" << std::endl;
+            cout << "Binary search: no patient aged exactly 65 in this dataset" << endl;
 
-        // Query B: visit duration threshold
-        PatientList matchesB;
-        SearchStats b[2];
+        // Long stay search: visit duration threshold
+        PatientList longStayMatches;
+        SearchStats longStayStats[2];
 
         lists[i].sort(byIdAsc);
-        b[0] = linearSearch(lists[i], critB, matchesB);
+        longStayStats[0] = linearSearch(lists[i], longStay, longStayMatches);
 
         lists[i].sort(byStayAsc);
-        const int first = binaryFirstGreater(lists[i], stayOf, 24.0, b[1]);
+        const int first = binaryFirstGreater(lists[i], stayOf, 24.0, longStayStats[1]);
 
-        std::cout << "\nQuery B: Length of Stay > 24 hours" << std::endl;
-        printSearchStatsTable(b, 2);
-        std::cout << "\nMatching records (linear search result):" << std::endl;
-        printSampleRows(matchesB, 10);
-        std::cout << "Binary search boundary index = " << first << " (" << b[1].matches
-                  << " records from this index onwards match)" << std::endl;
+        cout << "\nLong Stay Patients: Visit Duration > 24 hours" << endl;
+        printSearchStatsTable(longStayStats, 2);
+        cout << "\nMatching records (linear search result):" << endl;
+        printSampleRows(longStayMatches, 10);
+        cout << "Binary search boundary index = " << first << " (" << longStayStats[1].matches
+                  << " records from this index onwards match)" << endl;
 
         lists[i].sort(byIdAsc);   // leave list in original order for the other menu options
     }
 }
 
 int main() {
-    const std::string FILES[DATASET_COUNT] = {
+    const string FILES[DATASET_COUNT] = {
         "dataset/dataset1 facility_a.csv",
         "dataset/dataset2 facility_b.csv",
         "dataset/dataset3_facility_c.csv"
     };
-    const std::string LABELS[LIST_COUNT] = {
+    const string LABELS[LIST_COUNT] = {
         "Dataset 1 - Facility A",
         "Dataset 2 - Facility B",
         "Dataset 3 - Facility C",
         "ALL DATASETS COMBINED"
     };
-    const std::string SHORT_LABELS[DATASET_COUNT] = {
+    const string SHORT_LABELS[DATASET_COUNT] = {
         "Dataset 1", "Dataset 2", "Dataset 3"
     };
 
     PatientList lists[LIST_COUNT];
 
     if (!loadAll(lists, FILES)) {
-        std::cerr << "Loading failed - check that the dataset folder sits next "
+        cerr << "Loading failed - check that the dataset folder sits next "
                      "to the executable.\n";
         return 1;
     }
@@ -206,7 +210,7 @@ int main() {
     bool running = true;
     while (running) {
         clearScreen();
-        std::cout << "============================================================\n"
+        cout << "============================================================\n"
                   << "  Singly Linked List Menu\n"
                   << "============================================================\n"
                   << "  1. Age group legend\n"
@@ -233,7 +237,7 @@ int main() {
                 if (which < 0) break;
                 const int rows = readInt("How many records to display (1-50): ", 1, 50, 10);
                 clearScreen();
-                std::cout << "\n" << LABELS[which] << "  ("
+                cout << "\n" << LABELS[which] << "  ("
                           << lists[which].size() << " records)\n";
                 printSampleRows(lists[which], rows);
                 pause();
@@ -287,6 +291,6 @@ int main() {
         }
     }
 
-    std::cout << "\nExiting.\n";
+    cout << "\nExiting.\n";
     return 0;
 }
