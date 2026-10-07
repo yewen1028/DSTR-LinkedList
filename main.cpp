@@ -94,9 +94,8 @@ static void fullReport(const PatientList lists[], const Analysis stats[],
     printCrossMatrix(stats, shortLabels, DATASET_COUNT, stats[DATASET_COUNT], false);
 }
 
-//Step6 and Step7: Sorting and searching experiment
-static void sortSearchExperiment(PatientList lists[], const std::string labels[]) {
-    //Step6: Sorting experiment
+//Step6: Sorting experiment
+static void sortExperiment(PatientList lists[], const std::string labels[]) {
     std::cout << "\n=== SORTING EXPERIMENT ===" << std::endl;
     for (int i = 0; i < LIST_COUNT; ++i) {
         PatientLess rules[3] = { byAgeAsc, byStayAsc, byCostDesc };
@@ -112,9 +111,13 @@ static void sortSearchExperiment(PatientList lists[], const std::string labels[]
             stats[k + 3] = measureSort(lists[i], rules[k], "Insertion / " + names[k], true);
         }
         printSortStatsTable(stats, 6, labels[i], lists[i].size());
-    }
 
-    //Step7: Searching experiment
+        lists[i].sort(byIdAsc);   // leave list in original order for the other menu options
+    }
+}
+
+//Step7: Searching experiment
+static void searchExperiment(PatientList lists[], const std::string labels[]) {
     std::cout << "\n=== SEARCHING EXPERIMENT ===" << std::endl;
     SearchCriteria critA;
     critA.useAgeRange = true;
@@ -212,10 +215,11 @@ int main() {
                   << "  4. Care type analysis\n"
                   << "  5. Cross-dataset comparison\n"
                   << "  6. Full report (everything above)\n"
-                  << "  7. Sorting and searching experiment\n"
+                  << "  7. Sorting experiment\n"
+                  << "  8. Searching experiment\n"
                   << "  0. Exit\n";
 
-        const int choice = readInt("Enter a Choice: ", 0, 7, 0);
+        const int choice = readInt("Enter a Choice: ", 0, 8, 0);
         clearScreen();
 
         switch (choice) {
@@ -267,7 +271,12 @@ int main() {
                 break;
 
             case 7:
-                sortSearchExperiment(lists, LABELS);
+                sortExperiment(lists, LABELS);
+                pause();
+                break;
+
+            case 8:
+                searchExperiment(lists, LABELS);
                 pause();
                 break;
 
