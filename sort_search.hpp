@@ -15,8 +15,10 @@ double costOf(const Patient& p);
 struct SortStats {
     std::string label;
     long comparisons;
+    long moves;        // pointer relinks (array version counts element copies)
     double timeMs;
-    long memoryBytes;
+    long dataBytes;    // size of all nodes in the list
+    long auxBytes;     // extra memory used by the algorithm itself
 };
 
 SortStats measureSort(PatientList& list, PatientLess less, const std::string& label, bool useInsertion = false);
@@ -24,7 +26,7 @@ SortStats measureSort(PatientList& list, PatientLess less, const std::string& la
 bool byStayAsc(const Patient& a, const Patient& b);
 bool byIdAsc(const Patient& a, const Patient& b);
 
-void printSortStatsTable(const SortStats stats[], int count);
+void printSortStatsTable(const SortStats stats[], int count, const std::string& title, int n);
 
 //Step7: Searching experiment
 
@@ -37,21 +39,27 @@ struct SearchCriteria {
     int minLengthOfStay;
 
     SearchCriteria()
-        : useAgeRange(false), minAge(0), maxAge(), useCareType(false), useStayOver(false), minLengthOfStay(0) {}
-    
+        : useAgeRange(false), minAge(0), maxAge(0), useCareType(false), useStayOver(false), minLengthOfStay(0) {}
+
     bool matches(const Patient& p) const;
 };
 
 struct SearchStats {
     std::string label;
-    long comparisons;
+    long comparisons;  // key comparisons only, same meaning as the array version
+    long nodeHops;     // next-pointer steps needed to reach nodes (array: 0, direct indexing)
     double timeMs;
     int matches;
+    long extraBytes;
 };
 
 SearchStats linearSearch(const PatientList& list, const SearchCriteria& crit, PatientList& results);
 
+int binaryFirstGreater(const PatientList& sortedList, double (*keyOf)(const Patient&), double threshold, SearchStats& statsOut);
+
 Node* binarySearchByKey(const PatientList& sortedList, double (*keyOf)(const Patient&), double target, SearchStats& statsOut);
+
+SearchStats rangeSearchSortedByAge(const PatientList& sortedByAge, const SearchCriteria& crit, PatientList& results);
 
 void printSearchStatsTable(const SearchStats stats[], int count);
 

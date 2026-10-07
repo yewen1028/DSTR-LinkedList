@@ -1,6 +1,7 @@
 #include "patient_list.hpp"
 
 long g_sortComparisons = 0;
+long g_sortMoves = 0;
 
 void PatientList::append(const Patient& p) {
     Node* n = new Node(p);
@@ -30,6 +31,7 @@ Node* PatientList::findByID(const std::string& id) const {
 
 void PatientList::sort(PatientLess less) {
     g_sortComparisons = 0;
+    g_sortMoves = 0;
     head_ = mergeSort(head_, less);
     Node* cur = head_;
     while (cur != nullptr && cur->next != nullptr) cur = cur->next;
@@ -39,12 +41,13 @@ void PatientList::sort(PatientLess less) {
 //Step6: Sorting experiment - insertion sort
 void PatientList::insertionSort(PatientLess less) {
     g_sortComparisons = 0;
+    g_sortMoves = 0;
     Node* sorted = nullptr;
     Node* current = head_;
 
     while (current != nullptr) {
         Node* nextNode = current->next;
-        g_sortComparisons++;
+        if (sorted != nullptr) g_sortComparisons++;
 
         if (sorted == nullptr || less(current->data, sorted->data)) {
             current->next = sorted;
@@ -60,6 +63,7 @@ void PatientList::insertionSort(PatientLess less) {
             current->next = temp->next;
             temp->next = current;
         }
+        g_sortMoves += 2;   // two pointer relinks per insertion
         current = nextNode;
     }
     head_ = sorted;
@@ -107,8 +111,10 @@ Node* PatientList::merge(Node* a, Node* b, PatientLess less) {
             a = a->next;
         }
         tail = tail->next;
+        ++g_sortMoves;
     }
     tail->next = (a != nullptr) ? a : b;
+    ++g_sortMoves;
     return stub.next;
 }
 

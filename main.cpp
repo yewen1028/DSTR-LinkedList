@@ -88,48 +88,77 @@ static void sortSearchExperiment(PatientList lists[], const std::string labels[]
     //Step6: Sorting experiment
     std::cout << "\n=== SORTING EXPERIMENT ===" << std::endl;
     for (int i = 0; i < LIST_COUNT; ++i) {
-        std::cout << "\n-- " << labels[i] << " (" << lists[i].size() << " records) --" << std::endl;
-
         PatientLess rules[3] = { byAgeAsc, byStayAsc, byCostDesc };
         std::string names[3] = { "Age", "LengthOfStay", "TotalCost" };
         SortStats stats[6];
 
+        // Reset to original (ID) order before every run so each sort starts
+        // from the same input as the array version.
         for (int k = 0; k < 3; ++k) {
             lists[i].sort(byIdAsc);
-            stats[k] = measureSort(lists[i], rules[k], "Merge/" + names[k], false);
+            stats[k] = measureSort(lists[i], rules[k], "Merge / " + names[k], false);
             lists[i].sort(byIdAsc);
-            stats[k + 3] = measureSort(lists[i], rules[k], "Insert/" + names[k], true);
+            stats[k + 3] = measureSort(lists[i], rules[k], "Insertion / " + names[k], true);
         }
-        printSortStatsTable(stats, 6);
+        printSortStatsTable(stats, 6, labels[i], lists[i].size());
     }
 
     //Step7: Searching experiment
     std::cout << "\n=== SEARCHING EXPERIMENT ===" << std::endl;
-    SearchCriteria crit;
-    crit.useAgeRange = true;
-    crit.minAge = 61;
-    crit.maxAge = 100;
-    crit.useCareType = true;
-    crit.careType = "Emergency";
+    SearchCriteria critA;
+    critA.useAgeRange = true;
+    critA.minAge = 61;
+    critA.maxAge = 100;
+    critA.useCareType = true;
+    critA.careType = "Emergency";
+
+    SearchCriteria critB;
+    critB.useStayOver = true;
+    critB.minLengthOfStay = 24;
 
     for (int i = 0; i < LIST_COUNT; ++i) {
-        std::cout << "\n-- " << labels[i] << " --" << std::endl;
-        PatientList matches;
-        SearchStats searchStats[2];
+        std::cout << "\n------------------------------------------------------------\n"
+                  << labels[i] << " (" << lists[i].size() << " records)\n"
+                  << "------------------------------------------------------------" << std::endl;
 
-        searchStats[0] = linearSearch(lists[i], crit, matches);
+        // Query A: linear search on unsorted (original order), then on data sorted by age
+        PatientList matchesA, matchesSortedA;
+        SearchStats a[3];
+
+        lists[i].sort(byIdAsc);
+        a[0] = linearSearch(lists[i], critA, matchesA);
 
         lists[i].sort(byAgeAsc);
-        Node* hit = binarySearchByKey(lists[i], ageOf, 65.0, searchStats[1]);
+        a[1] = rangeSearchSortedByAge(lists[i], critA, matchesSortedA);
+        Node* hit = binarySearchByKey(lists[i], ageOf, 65.0, a[2]);
 
-        printSearchStatsTable(searchStats, 2);
-        std::cout << "Matches for Age 61-100 + CareType=Emergency (" << matches.size() << " found):" << std::endl;
-        printSampleRows(matches, matches.size());
-
+        std::cout << "\nQuery A: Age 61-100 + Care Type = Emergency" << std::endl;
+        printSearchStatsTable(a, 3);
+        std::cout << "\nMatching records (linear search result):" << std::endl;
+        printSampleRows(matchesA, 10);
         if (hit != nullptr)
-            std::cout << "Binary search found Age==65: " << hit->data.patientID << std::endl;
+            std::cout << "Binary search found a patient aged 65: " << hit->data.patientID << std::endl;
         else
-            std::cout << "Binary search: no exact Age==65 match in this list" << std::endl;
+            std::cout << "Binary search: no patient aged exactly 65 in this dataset" << std::endl;
+
+        // Query B: visit duration threshold
+        PatientList matchesB;
+        SearchStats b[2];
+
+        lists[i].sort(byIdAsc);
+        b[0] = linearSearch(lists[i], critB, matchesB);
+
+        lists[i].sort(byStayAsc);
+        const int first = binaryFirstGreater(lists[i], stayOf, 24.0, b[1]);
+
+        std::cout << "\nQuery B: Length of Stay > 24 hours" << std::endl;
+        printSearchStatsTable(b, 2);
+        std::cout << "\nMatching records (linear search result):" << std::endl;
+        printSampleRows(matchesB, 10);
+        std::cout << "Binary search boundary index = " << first << " (" << b[1].matches
+                  << " records from this index onwards match)" << std::endl;
+
+        lists[i].sort(byIdAsc);   // leave list in original order for the other menu options
     }
 }
 
