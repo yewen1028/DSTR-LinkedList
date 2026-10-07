@@ -44,7 +44,6 @@ SortStats measureSort(PatientList& list, PatientLess less, const string& label, 
 
 void printSortStatsTable(const SortStats stats[], int count) {
     cout << endl;
-    cout << "Step 6 - Sorting performance (singly linked list)" << endl;
     cout << left << setw(24) << "Algorithm/SortKey";
     cout << right << setw(14) << "Comparisons";
     cout << right << setw(12) << "Time(ms)";
@@ -130,7 +129,6 @@ Node* binarySearchByKey(const PatientList& sortedList, double (*keyOf)(const Pat
 
 void printSearchStatsTable(const SearchStats stats[], int count) {
     cout << endl;
-    cout << "Step 7 - Search performance (singly linked list)" << endl;
     cout << left << setw(22) << "SearchType";
     cout << right << setw(14) << "Comparisons";
     cout << right << setw(12) << "Time(ms)";

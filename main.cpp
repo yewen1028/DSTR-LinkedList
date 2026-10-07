@@ -86,7 +86,7 @@ static void fullReport(const PatientList lists[], const Analysis stats[],
 //Step6 and Step7: Sorting and searching experiment
 static void sortSearchExperiment(PatientList lists[], const std::string labels[]) {
     //Step6: Sorting experiment
-    std::cout << "\n=== SORTING EXPERIMENT (Step 6) ===" << std::endl;
+    std::cout << "\n=== SORTING EXPERIMENT ===" << std::endl;
     for (int i = 0; i < LIST_COUNT; ++i) {
         std::cout << "\n-- " << labels[i] << " (" << lists[i].size() << " records) --" << std::endl;
 
@@ -104,7 +104,7 @@ static void sortSearchExperiment(PatientList lists[], const std::string labels[]
     }
 
     //Step7: Searching experiment
-    std::cout << "\n=== SEARCHING EXPERIMENT (Step 7) ===" << std::endl;
+    std::cout << "\n=== SEARCHING EXPERIMENT ===" << std::endl;
     SearchCriteria crit;
     crit.useAgeRange = true;
     crit.minAge = 61;
@@ -171,7 +171,7 @@ int main() {
                   << "  4. Care type analysis\n"
                   << "  5. Cross-dataset comparison\n"
                   << "  6. Full report (everything above)\n"
-                  << "  7. Sorting and searching experiment (Step 6-7)\n"
+                  << "  7. Sorting and searching experiment\n"
                   << "  0. Exit\n";
 
         const int choice = readInt("Enter a Choice: ", 0, 7, 0);
