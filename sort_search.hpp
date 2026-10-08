@@ -15,10 +15,10 @@ double costOf(const Patient& p);
 struct SortStats {
     std::string label;
     long comparisons;
-    long moves;        // pointer relinks (array version counts element copies)
+    long moves;        // relink pointer
     double timeMs;
-    long dataBytes;    // size of all nodes in the list
-    long auxBytes;     // extra memory used by the algorithm itself
+    long dataBytes;    // size of all nodes in list
+    long auxBytes;     // extra memory
 };
 
 SortStats measureSort(PatientList& list, PatientLess less, const std::string& label, bool useInsertion = false);
