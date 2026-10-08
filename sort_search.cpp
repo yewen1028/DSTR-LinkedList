@@ -13,10 +13,6 @@ double stayOf(const Patient& p) {
     return p.lengthOfStay;
 }
 
-double costOf(const Patient& p) {
-    return p.medicalCost;
-}
-
 bool byStayAsc(const Patient& a, const Patient& b) {
     return a.lengthOfStay < b.lengthOfStay;
 }

@@ -14,21 +14,6 @@ void PatientList::append(const Patient& p) {
     ++size_;
 }
 
-void PatientList::prepend(const Patient& p) {
-    Node* n = new Node(p);
-    n->next = head_;
-    head_ = n;
-    if (tail_ == nullptr) tail_ = n;
-    ++size_;
-}
-
-Node* PatientList::findByID(const std::string& id) const {
-    for (Node* cur = head_; cur != nullptr; cur = cur->next) {
-        if (cur->data.patientID == id) return cur;
-    }
-    return nullptr;
-}
-
 void PatientList::sort(PatientLess less) {
     g_sortComparisons = 0;
     g_sortMoves = 0;

@@ -27,10 +27,6 @@ public:
 
     void append(const Patient& p);
 
-    void prepend(const Patient& p);
-
-    Node* findByID(const std::string& id) const;
-
     void sort(PatientLess less);
     void insertionSort(PatientLess less);
 
@@ -38,7 +34,6 @@ public:
 
     Node* head() const { return head_; }
     int   size() const { return size_; }
-    bool  empty() const { return head_ == nullptr; }
 
 private:
     static Node* split(Node* start);

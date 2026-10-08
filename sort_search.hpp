@@ -10,7 +10,6 @@
 
 double ageOf(const Patient& p);
 double stayOf(const Patient& p);
-double costOf(const Patient& p);
 
 struct SortStats {
     std::string label;
