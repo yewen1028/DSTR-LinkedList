@@ -6,7 +6,6 @@
 #include "dataset.hpp"
 #include "patient_list.hpp"
 
-//Step6: Sorting experiment
 
 double ageOf(const Patient& p);
 double stayOf(const Patient& p);
@@ -14,10 +13,10 @@ double stayOf(const Patient& p);
 struct SortStats {
     std::string label;
     long comparisons;
-    long moves;        // relink pointer
+    long moves;
     double timeMs;
-    long dataBytes;    // size of all nodes in list
-    long auxBytes;     // extra memory
+    long dataBytes;
+    long auxBytes;
 };
 
 SortStats measureSort(PatientList& list, PatientLess less, const std::string& label, bool useInsertion = false);
@@ -27,7 +26,6 @@ bool byIdAsc(const Patient& a, const Patient& b);
 
 void printSortStatsTable(const SortStats stats[], int count, const std::string& title, int n);
 
-//Step7: Searching experiment
 
 struct SearchCriteria {
     bool useAgeRange;
@@ -45,8 +43,8 @@ struct SearchCriteria {
 
 struct SearchStats {
     std::string label;
-    long comparisons;  // key comparisons only, same meaning as the array version
-    long nodeHops;     // next-pointer steps needed to reach nodes (array: 0, direct indexing)
+    long comparisons;
+    long nodeHops;
     double timeMs;
     int matches;
     long extraBytes;

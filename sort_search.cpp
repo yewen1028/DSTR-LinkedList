@@ -4,7 +4,6 @@
 #include "sort_search.hpp"
 using namespace std;
 
-//Step6: Sorting experiment
 double ageOf(const Patient& p) {
     return p.age;
 }
@@ -36,8 +35,6 @@ SortStats measureSort(PatientList& list, PatientLess less, const string& label, 
     s.moves = g_sortMoves;
     s.timeMs = chrono::duration<double, milli>(end - start).count();
     s.dataBytes = static_cast<long>(list.size()) * static_cast<long>(sizeof(Node));
-    // Both sorts relink existing nodes in place: no copy buffer like the array merge sort.
-    // Merge sort only needs one dummy stub node; insertion sort needs 3 pointers.
     s.auxBytes = useInsertion ? static_cast<long>(3 * sizeof(Node*)) : static_cast<long>(sizeof(Node));
     return s;
 }
@@ -62,7 +59,6 @@ void printSortStatsTable(const SortStats stats[], int count, const string& title
     }
 }
 
-//Step7: Searching experiment
 bool SearchCriteria::matches(const Patient& p) const {
     if (useAgeRange && (p.age < minAge || p.age > maxAge))
         return false;
@@ -73,7 +69,6 @@ bool SearchCriteria::matches(const Patient& p) const {
     return true;
 }
 
-// A singly linked list has no index: reaching position `index` means walking from head.
 static Node* nodeAt(const PatientList& list, int index, long& hops) {
     Node* cur = list.head();
     for (int i = 0; i < index && cur != nullptr; i++) {
@@ -87,7 +82,7 @@ SearchStats linearSearch(const PatientList& list, const SearchCriteria& crit, Pa
     SearchStats s;
     s.label = "Linear (unsorted)";
     s.comparisons = 0;
-    s.nodeHops = 0;   // sequential scan, same cost as array i++
+    s.nodeHops = 0;
     s.matches = 0;
 
     chrono::high_resolution_clock::time_point start = chrono::high_resolution_clock::now();
@@ -107,7 +102,6 @@ SearchStats linearSearch(const PatientList& list, const SearchCriteria& crit, Pa
     return s;
 }
 
-// Returns the index of the first node whose key is greater than threshold.
 int binaryFirstGreater(const PatientList& sortedList, double (*keyOf)(const Patient&), double threshold, SearchStats& statsOut) {
     statsOut.label = "Binary (boundary)";
     statsOut.comparisons = 0;
@@ -164,7 +158,6 @@ Node* binarySearchByKey(const PatientList& sortedList, double (*keyOf)(const Pat
     return found;
 }
 
-// Binary search for the first age >= minAge, then scan forward until age > maxAge.
 SearchStats rangeSearchSortedByAge(const PatientList& sortedByAge, const SearchCriteria& crit, PatientList& results) {
     SearchStats s;
     s.label = "Binary+scan (sorted)";

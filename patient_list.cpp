@@ -23,7 +23,6 @@ void PatientList::sort(PatientLess less) {
     tail_ = cur;
 }
 
-//Step6: Sorting experiment - insertion sort
 void PatientList::insertionSort(PatientLess less) {
     g_sortComparisons = 0;
     g_sortMoves = 0;
@@ -48,7 +47,7 @@ void PatientList::insertionSort(PatientLess less) {
             current->next = temp->next;
             temp->next = current;
         }
-        g_sortMoves += 2;   // two pointer relinks per insertion
+        g_sortMoves += 2;
         current = nextNode;
     }
     head_ = sorted;

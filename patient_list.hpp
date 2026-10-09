@@ -14,7 +14,7 @@ struct Node {
 typedef bool (*PatientLess)(const Patient& a, const Patient& b);
 
 extern long g_sortComparisons;
-extern long g_sortMoves;   // pointer relinks done by the last sort
+extern long g_sortMoves;
 
 class PatientList {
 public:

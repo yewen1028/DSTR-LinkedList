@@ -36,8 +36,6 @@ static int readInt(const string& prompt, int lo, int hi, int onEOF) {
     return onEOF;
 }
 
-// Wipe the console so each menu and result starts on a fresh screen.
-// Also stops the VS Code terminal from leaving stale text from earlier output.
 static void clearScreen() {
 #ifdef _WIN32
     system("cls");
@@ -96,7 +94,6 @@ static void fullReport(const PatientList lists[], const Analysis stats[],
     printCrossMatrix(stats, shortLabels, DATASET_COUNT, stats[DATASET_COUNT], false);
 }
 
-//Step6: Sorting experiment
 static void sortExperiment(PatientList lists[], const string labels[]) {
     cout << "\n=== SORTING EXPERIMENT ===" << endl;
     for (int i = 0; i < LIST_COUNT; ++i) {
@@ -104,8 +101,6 @@ static void sortExperiment(PatientList lists[], const string labels[]) {
         string names[3] = { "Age", "LengthOfStay", "TotalCost" };
         SortStats stats[6];
 
-        // Reset to original (ID) order before every run so each sort starts
-        // from the same input as the array version.
         for (int k = 0; k < 3; ++k) {
             lists[i].sort(byIdAsc);
             stats[k] = measureSort(lists[i], rules[k], "Merge / " + names[k], false);
@@ -114,14 +109,12 @@ static void sortExperiment(PatientList lists[], const string labels[]) {
         }
         printSortStatsTable(stats, 6, labels[i], lists[i].size());
 
-        lists[i].sort(byIdAsc);   // leave list in original order for the other menu options
+        lists[i].sort(byIdAsc);
     }
 }
 
-//Step7: Searching experiment
 static void searchExperiment(PatientList lists[], const string labels[]) {
     cout << "\n=== SEARCHING EXPERIMENT ===" << endl;
-    // Senior emergency search: age group 61-100 + care type Emergency
     SearchCriteria seniorEmergency;
     seniorEmergency.useAgeRange = true;
     seniorEmergency.minAge = 61;
@@ -129,7 +122,6 @@ static void searchExperiment(PatientList lists[], const string labels[]) {
     seniorEmergency.useCareType = true;
     seniorEmergency.careType = "Emergency";
 
-    // Long stay search: visit duration threshold > 24 hours
     SearchCriteria longStay;
     longStay.useStayOver = true;
     longStay.minLengthOfStay = 24;
@@ -139,7 +131,6 @@ static void searchExperiment(PatientList lists[], const string labels[]) {
                   << labels[i] << " (" << lists[i].size() << " records)\n"
                   << "------------------------------------------------------------" << endl;
 
-        // Senior emergency search: linear search on unsorted (original order), then on data sorted by age
         PatientList emergencyMatches, emergencyMatchesSorted;
         SearchStats emergencyStats[3];
 
@@ -159,7 +150,6 @@ static void searchExperiment(PatientList lists[], const string labels[]) {
         else
             cout << "Binary search: no patient aged exactly 65 in this dataset" << endl;
 
-        // Long stay search: visit duration threshold
         PatientList longStayMatches;
         SearchStats longStayStats[2];
 
@@ -176,7 +166,7 @@ static void searchExperiment(PatientList lists[], const string labels[]) {
         cout << "Binary search boundary index = " << first << " (" << longStayStats[1].matches
                   << " records from this index onwards match)" << endl;
 
-        lists[i].sort(byIdAsc);   // leave list in original order for the other menu options
+        lists[i].sort(byIdAsc);
     }
 }
 
